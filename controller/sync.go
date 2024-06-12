@@ -4,6 +4,7 @@ import (
 	"context"
 	goerrors "errors"
 	"fmt"
+	"k8s.io/apimachinery/pkg/runtime"
 	"os"
 	"strconv"
 	"sync/atomic"
@@ -206,7 +207,10 @@ func (m *appStateManager) SyncAppState(app *v1alpha1.Application, state *v1alpha
 	}
 
 	rawConfig := clst.RawRestConfig()
+	rawConfig.AcceptContentTypes = runtime.ContentTypeProtobuf + "," + runtime.ContentTypeJSON
+	rawConfig.UserAgent = "argocd-application-controller-syncer-indeed-fork/v2.10.11+e201ac3.dirty (linux/amd64)"
 	restConfig := metrics.AddMetricsTransportWrapper(m.metricsServer, app, clst.RESTConfig())
+	restConfig.UserAgent = "argocd-application-controller-rest-syncer-indeed-fork/v2.10.11+e201ac3.dirty (linux/amd64)"
 
 	resourceOverrides, err := m.settingsMgr.GetResourceOverrides()
 	if err != nil {

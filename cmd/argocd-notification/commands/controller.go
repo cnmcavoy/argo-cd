@@ -81,10 +81,11 @@ func NewCommand() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to create REST client config: %w", err)
 			}
-			restConfig.UserAgent = fmt.Sprintf("argocd-notifications-controller/%s (%s)", vers.Version, vers.Platform)
+			restConfig.UserAgent = fmt.Sprintf("argocd-notifications-controller-indeed-fork/%s (%s)", vers.Version, vers.Platform)
 			if acceptProtobufContentType {
 				restConfig.AcceptContentTypes = runtime.ContentTypeProtobuf + "," + runtime.ContentTypeJSON
 			}
+			log.Infof("argocd-notifications-controller accept content types: %s", restConfig.AcceptContentTypes)
 
 			dynamicClient, err := dynamic.NewForConfig(restConfig)
 			if err != nil {

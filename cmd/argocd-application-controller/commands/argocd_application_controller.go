@@ -104,10 +104,11 @@ func NewCommand() *cobra.Command {
 			config, err := clientConfig.ClientConfig()
 			errors.CheckError(err)
 			errors.CheckError(v1alpha1.SetK8SConfigDefaults(config))
-			config.UserAgent = fmt.Sprintf("%s/%s (%s)", common.DefaultApplicationControllerName, vers.Version, vers.Platform)
+			config.UserAgent = fmt.Sprintf("%s-indeed-fork/%s (%s)", common.DefaultApplicationControllerName, vers.Version, vers.Platform)
 			if acceptProtobufContentType {
 				config.AcceptContentTypes = runtime.ContentTypeProtobuf + "," + runtime.ContentTypeJSON
 			}
+			log.Infof("application controller accept content types: %s", config.AcceptContentTypes)
 
 			kubeClient := kubernetes.NewForConfigOrDie(config)
 			appClient := appclientset.NewForConfigOrDie(config)
@@ -241,10 +242,8 @@ func NewCommand() *cobra.Command {
 	command.Flags().DurationVar(&ignoreNormalizerOpts.JQExecutionTimeout, "ignore-normalizer-jq-execution-timeout-seconds", env.ParseDurationFromEnv("ARGOCD_IGNORE_NORMALIZER_JQ_TIMEOUT", 0*time.Second, 0, math.MaxInt64), "Set ignore normalizer JQ execution timeout")
 	command.Flags().BoolVar(&acceptProtobufContentType, "accept-protobuf-content-type-enabled", env.ParseBoolFromEnv("ARGOCD_ACCEPT_PROTOBUF_CONTENTTYPE_ENABLED", false), "Allows the Argo CD repo server to receive kubernetes api responses in protobuf instead of json, if possible. This may improve performance in serialization but is experimental.")
 
-	cacheSource = appstatecache.AddCacheFlagsToCmd(&command, cacheutil.Options{
-		OnClientCreated: func(client *redis.Client) {
-			redisClient = client
-		},
+	cacheSource = appstatecache.AddCacheFlagsToCmd(&command, func(client *redis.Client) {
+		redisClient = client
 	})
 	return &command
 }

@@ -95,10 +95,11 @@ func NewCommand() *cobra.Command {
 			restConfig, err := clientConfig.ClientConfig()
 			errors.CheckError(err)
 
-			restConfig.UserAgent = fmt.Sprintf("argocd-applicationset-controller/%s (%s)", vers.Version, vers.Platform)
+			restConfig.UserAgent = fmt.Sprintf("argocd-applicationset-controller-indeed-fork/%s (%s)", vers.Version, vers.Platform)
 			if acceptProtobufContentType {
 				restConfig.AcceptContentTypes = runtime.ContentTypeProtobuf + "," + runtime.ContentTypeJSON
 			}
+			log.Infof("applicationset accept content types: %s", restConfig.AcceptContentTypes)
 
 			policyObj, exists := utils.Policies[policy]
 			if !exists {
@@ -117,20 +118,10 @@ func NewCommand() *cobra.Command {
 				os.Exit(1)
 			}
 
-			if watchedNamespace != "" {
-				cacheOpt = ctrlcache.Options{
-					DefaultNamespaces: map[string]ctrlcache.Config{
-						watchedNamespace: {},
-					},
-				}
-			}
-
 			mgr, err := ctrl.NewManager(restConfig, ctrl.Options{
-				Scheme: scheme,
-				Metrics: metricsserver.Options{
-					BindAddress: metricsAddr,
-				},
-				Cache:                  cacheOpt,
+				Scheme:                 scheme,
+				MetricsBindAddress:     metricsAddr,
+				Namespace:              watchedNamespace,
 				HealthProbeBindAddress: probeBindAddr,
 				Port:                   9443,
 				LeaderElection:         enableLeaderElection,

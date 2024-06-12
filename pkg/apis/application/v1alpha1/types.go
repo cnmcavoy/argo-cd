@@ -2936,6 +2936,7 @@ func SetK8SConfigDefaults(config *rest.Config) error {
 
 	// Set server-side timeout
 	config.Timeout = K8sServerSideTimeout
+	config.AcceptContentTypes = runtime.ContentTypeProtobuf + "," + runtime.ContentTypeJSON
 
 	config.Transport = tr
 	maxRetries := env.ParseInt64FromEnv(utilhttp.EnvRetryMax, 0, 1, math.MaxInt64)
@@ -3034,6 +3035,7 @@ func (c *Cluster) RawRestConfig() *rest.Config {
 	config.Timeout = K8sServerSideTimeout
 	config.QPS = K8sClientConfigQPS
 	config.Burst = K8sClientConfigBurst
+	config.AcceptContentTypes = runtime.ContentTypeProtobuf + "," + runtime.ContentTypeJSON
 	return config
 }
 

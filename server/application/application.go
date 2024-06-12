@@ -1232,6 +1232,7 @@ func (s *Server) getApplicationClusterConfig(ctx context.Context, a *appv1.Appli
 		return nil, fmt.Errorf("error getting cluster: %w", err)
 	}
 	config := clst.RESTConfig()
+	config.UserAgent = "argocd-application-controller-application-cluster-config/v2.10.11+e201ac3.dirty (linux/amd64)"
 	return config, err
 }
 

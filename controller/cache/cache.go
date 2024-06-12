@@ -454,6 +454,8 @@ func (c *liveStateCache) getCluster(server string) (clustercache.ClusterCache, e
 	}
 
 	clusterCacheConfig := cluster.RESTConfig()
+	clusterCacheConfig.UserAgent = "argocd-application-controller-cluster-config-cache/v2.10.11+e201ac3.dirty (linux/amd64)"
+
 	// Controller dynamically fetches all resource types available on the cluster
 	// using a discovery API that may contain deprecated APIs.
 	// This causes log flooding when managing a large number of clusters.
@@ -773,7 +775,9 @@ func (c *liveStateCache) handleModEvent(oldCluster *appv1.Cluster, newCluster *a
 
 		var updateSettings []clustercache.UpdateSettingsFunc
 		if !reflect.DeepEqual(oldCluster.Config, newCluster.Config) {
-			updateSettings = append(updateSettings, clustercache.SetConfig(newCluster.RESTConfig()))
+			clusterCacheConfig := newCluster.RESTConfig()
+			clusterCacheConfig.UserAgent = "argocd-application-controller-cluster-config-cache/v2.10.11+e201ac3.dirty (linux/amd64)"
+			updateSettings = append(updateSettings, clustercache.SetConfig(clusterCacheConfig))
 		}
 		if !reflect.DeepEqual(oldCluster.Namespaces, newCluster.Namespaces) {
 			updateSettings = append(updateSettings, clustercache.SetNamespaces(newCluster.Namespaces))

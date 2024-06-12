@@ -111,15 +111,22 @@ func NewCommand() *cobra.Command {
 			cache, err := cacheSrc()
 			errors.CheckError(err)
 
+			config.UserAgent = fmt.Sprintf("argocd-server-indeed-fork/%s (%s)", vers.Version, vers.Platform)
+			if acceptProtobufContentType {
+				config.AcceptContentTypes = runtime.ContentTypeProtobuf + "," + runtime.ContentTypeJSON
+			}
+			log.Infof("argocd-server accept content types: %s", config.AcceptContentTypes)
 			kubeclientset := kubernetes.NewForConfigOrDie(config)
 
 			appclientsetConfig, err := clientConfig.ClientConfig()
 			errors.CheckError(err)
 			errors.CheckError(v1alpha1.SetK8SConfigDefaults(appclientsetConfig))
-			config.UserAgent = fmt.Sprintf("argocd-server/%s (%s)", vers.Version, vers.Platform)
 			if acceptProtobufContentType {
-				config.AcceptContentTypes = runtime.ContentTypeProtobuf + "," + runtime.ContentTypeJSON
+				appclientsetConfig.AcceptContentTypes = runtime.ContentTypeProtobuf + "," + runtime.ContentTypeJSON
 			}
+			appclientsetConfig.UserAgent = fmt.Sprintf("argocd-server-appclientsets-indeed-fork/%s (%s)", vers.Version, vers.Platform)
+
+			log.Infof("argocd-server appclientsetConfig accept content types: %s", appclientsetConfig.AcceptContentTypes)
 
 			if failureRetryCount > 0 {
 				appclientsetConfig = kube.AddFailureRetryWrapper(appclientsetConfig, failureRetryCount, failureRetryPeriodMilliSeconds)
